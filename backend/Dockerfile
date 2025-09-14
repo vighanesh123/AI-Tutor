@@ -20,8 +20,14 @@ COPY src ./src
 # Build the application
 RUN mvn clean package -DskipTests
 
+# List contents to debug
+RUN ls -la target/
+
+# Copy JAR to a known location
+RUN cp target/*.jar app.jar
+
 # Expose port
 EXPOSE 5000
 
 # Run the application
-CMD ["java", "-jar", "target/aitutor-0.0.1-SNAPSHOT.jar"]
+CMD ["java", "-jar", "app.jar"]
