@@ -1,25 +1,29 @@
-FROM openjdk:17-jdk-slim
+FROM maven:3.8.6-openjdk-17-slim AS build
 
 WORKDIR /app
 
-# Copy Maven wrapper and pom.xml
-COPY .mvn/ .mvn/
-COPY mvnw mvnw.cmd pom.xml ./
-
-# Make mvnw executable
-RUN chmod +x mvnw
+# Copy pom.xml first for better caching
+COPY pom.xml .
 
 # Download dependencies
-RUN ./mvnw dependency:go-offline -B
+RUN mvn dependency:go-offline -B
 
 # Copy source code
 COPY src ./src
 
 # Build the application
-RUN ./mvnw clean package -DskipTests
+RUN mvn clean package -DskipTests
+
+# Runtime stage
+FROM openjdk:17-jdk-slim
+
+WORKDIR /app
+
+# Copy the built jar from build stage
+COPY --from=build /app/target/aitutor-0.0.1-SNAPSHOT.jar app.jar
 
 # Expose port
 EXPOSE 5000
 
 # Run the application
-CMD ["java", "-jar", "target/aitutor-0.0.1-SNAPSHOT.jar"]
+CMD ["java", "-jar", "app.jar"]
