@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Tutor Simple Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #status, #cors-test, #error-log {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #dff0d8;
+            color: #3c763d;
+        }
+        .error {
+            background-color: #f2dede;
+            color: #a94442;
+        }
+        pre {
+            background-color: #f8f8f8;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AI Tutor Simple Test</h1>
+        <p>This is a simple test page to check if the backend API is working.</p>
+        
+        <button id="checkStatus">Check Backend Status</button>
+        <button id="testCors">Test CORS</button>
+        <button id="testGemini">Test Gemini AI</button>
+        <button id="clearStatus">Clear Status</button>
+        
+        <div id="status"></div>
+        <div id="cors-test"></div>
+        <div id="error-log"></div>
+    </div>
+
+    <script>
+        // Function to log errors
+        function logError(error) {
+            const errorLogDiv = document.getElementById('error-log');
+            const errorMessage = typeof error === 'object' ? (error.message || JSON.stringify(error)) : error;
+            errorLogDiv.innerHTML += `<p>${new Date().toLocaleTimeString()}: ${errorMessage}</p>`;
+            errorLogDiv.className = 'error';
+            console.error(error);
+        }
+
+        // Global error handler
+        window.onerror = function(message, source, lineno, colno, error) {
+            logError(`Global error: ${message} at ${source}:${lineno}:${colno}`);
+            return true;
+        };
+
+        document.getElementById('checkStatus').addEventListener('click', async () => {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = 'Checking backend status...';
+            statusDiv.className = '';
+            
+            try {
+                const response = await fetch('http://localhost:8080/api/ai/status');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                const data = await response.json();
+                
+                statusDiv.innerHTML = `<h3>Backend Status:</h3><pre>${JSON.stringify(data, null, 2)}</pre>`;
+                statusDiv.className = 'success';
+            } catch (error) {
+                statusDiv.innerHTML = `<h3>Error:</h3><pre>${error.message}</pre>`;
+                statusDiv.className = 'error';
+                logError(error);
+            }
+        });
+        
+        document.getElementById('testCors').addEventListener('click', async () => {
+            const corsDiv = document.getElementById('cors-test');
+            corsDiv.innerHTML = 'Testing CORS...';
+            corsDiv.className = '';
+            
+            try {
+                const response = await fetch('http://localhost:8080/api/ai/status', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Origin': 'http://localhost:3000'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                corsDiv.innerHTML = `<h3>CORS Test Successful:</h3><pre>${JSON.stringify(data, null, 2)}</pre>`;
+                corsDiv.className = 'success';
+            } catch (error) {
+                corsDiv.innerHTML = `<h3>CORS Error:</h3><pre>${error.message}</pre>`;
+                corsDiv.className = 'error';
+                logError(error);
+            }
+        });
+        
+        document.getElementById('testGemini').addEventListener('click', async () => {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = 'Testing Gemini AI integration...';
+            statusDiv.className = '';
+            
+            try {
+                const response = await fetch('http://localhost:8080/api/ai/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Origin': 'http://localhost:3000'
+                    },
+                    body: JSON.stringify({
+                        message: 'Hello, can you help me with JavaScript?',
+                        conversationId: 'test-' + Date.now()
+                    })
+                });
+                
+                console.log('Response status:', response.status);
+                const responseText = await response.text();
+                console.log('Raw response:', responseText);
+                
+                let data;
+                try {
+                    // Try to parse as JSON
+                    data = JSON.parse(responseText);
+                    console.log('Response data:', data);
+                } catch (e) {
+                    // If not valid JSON, throw with the raw text
+                    throw new Error(`Server returned invalid JSON: ${responseText} (Status: ${response.status})`);
+                }
+                
+                statusDiv.innerHTML = `<h3>Gemini AI Test:</h3><pre>${JSON.stringify(data, null, 2)}</pre>`;
+                statusDiv.className = 'success';
+            } catch (error) {
+                statusDiv.innerHTML = `<h3>Gemini AI Error:</h3><pre>${error.message}</pre>`;
+                statusDiv.className = 'error';
+                logError(error);
+            }
+        });
+
+        document.getElementById('clearStatus').addEventListener('click', () => {
+            document.getElementById('status').innerHTML = '';
+            document.getElementById('status').className = '';
+            document.getElementById('cors-test').innerHTML = '';
+            document.getElementById('cors-test').className = '';
+        });
+
+        // Log initial page load
+        console.log('Test page loaded at:', new Date().toLocaleTimeString());
+        document.getElementById('error-log').innerHTML = '<p>Page loaded successfully</p>';
+    </script>
+</body>
+</html>

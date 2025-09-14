@@ -1,0 +1,60 @@
+spring:
+  application:
+    name: aitutor-backend
+  
+  data:
+    mongodb:
+      uri: mongodb+srv://vighneshdabare2004:2JdbEcZ1QHDfX399@cluster0.t11fhsz.mongodb.net/AI_TUTORIAL?retryWrites=true&w=majority&appName=Cluster0
+      database: AI_TUTORIAL
+
+  security:
+    jwt:
+      secret-key: ${JWT_SECRET:mySecretKey123456789012345678901234567890AITutor2024}
+      expiration: 86400000 # 24 hours
+
+server:
+  port: 8080
+
+# OpenAI Configuration (Deprecated - Using Gemini instead)
+openai:
+  api:
+    key: ${OPENAI_API_KEY:your-openai-api-key-here}
+    model: gpt-3.5-turbo
+    max-tokens: 500
+    temperature: 0.7
+    timeout: 30000
+
+# Gemini AI Configuration
+gemini:
+  api:
+    key: ${GEMINI_API_KEY:AIzaSyBbxtmYMyGr46DdvkWVEWJY0zepzGYTnow}
+    model: gemini-2.0-flash
+    max-tokens: 1024
+    temperature: 0.7
+    timeout: 10000
+
+# CORS Configuration
+cors:
+  allowed-origins:
+    - http://localhost:3000
+    - http://localhost:3001
+  allowed-methods:
+    - GET
+    - POST
+    - PUT
+    - DELETE
+    - OPTIONS
+  allowed-headers:
+    - "*"
+  allow-credentials: true
+
+# Logging
+logging:
+  level:
+    com.aitutor: DEBUG
+    org.springframework.security: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/aitutor.log

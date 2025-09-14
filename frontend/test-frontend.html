@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Tutor Test Frontend</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #dff0d8;
+            color: #3c763d;
+        }
+        .error {
+            background-color: #f2dede;
+            color: #a94442;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AI Tutor Test Frontend</h1>
+        <p>This is a simple test page to check if the backend is working correctly.</p>
+        
+        <button id="checkStatus">Check Backend Status</button>
+        <button id="clearStatus">Clear</button>
+        
+        <div id="status"></div>
+    </div>
+
+    <script>
+        document.getElementById('checkStatus').addEventListener('click', function() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = 'Checking backend status...';
+            statusDiv.className = '';
+            
+            fetch('http://localhost:8080/api/ai/status')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    statusDiv.innerHTML = `<h3>Backend is running!</h3>
+                        <p>Gemini Configured: ${data.geminiConfigured}</p>
+                        <p>Message: ${data.message}</p>`;
+                    statusDiv.className = 'success';
+                })
+                .catch(error => {
+                    statusDiv.innerHTML = `<h3>Error connecting to backend</h3>
+                        <p>${error.message}</p>
+                        <p>Make sure the backend is running on http://localhost:8080</p>`;
+                    statusDiv.className = 'error';
+                });
+        });
+
+        document.getElementById('clearStatus').addEventListener('click', function() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = '';
+            statusDiv.className = '';
+        });
+    </script>
+</body>
+</html>

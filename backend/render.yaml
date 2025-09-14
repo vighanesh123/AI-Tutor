@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: aitutor-backend
+    env: java
+    buildCommand: ./mvnw clean package -DskipTests
+    startCommand: java -jar target/aitutor-0.0.1-SNAPSHOT.jar
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: MONGODB_URI
+        fromDatabase:
+          name: aitutor-mongodb
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: GEMINI_API_KEY
+        sync: false
+    healthCheckPath: /api/health
+    
+databases:
+  - name: aitutor-mongodb
+    databaseName: aitutor
+    user: aitutor
