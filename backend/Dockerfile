@@ -4,7 +4,10 @@ WORKDIR /app
 
 # Copy Maven wrapper and pom.xml
 COPY .mvn/ .mvn/
-COPY mvnw pom.xml ./
+COPY mvnw mvnw.cmd pom.xml ./
+
+# Make mvnw executable
+RUN chmod +x mvnw
 
 # Download dependencies
 RUN ./mvnw dependency:go-offline -B
@@ -16,7 +19,7 @@ COPY src ./src
 RUN ./mvnw clean package -DskipTests
 
 # Expose port
-EXPOSE 8080
+EXPOSE 5000
 
 # Run the application
 CMD ["java", "-jar", "target/aitutor-0.0.1-SNAPSHOT.jar"]
